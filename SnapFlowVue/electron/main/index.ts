@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 //
 // ├─┬ dist-electron
 // │ ├─┬ main
-// │ │ └── index.js    > Electron-Main
+// │ │ └── index.ts    > Electron-Main
 // │ └─┬ preload
 // │   └── index.mjs   > Preload-Scripts
 // ├─┬ dist
