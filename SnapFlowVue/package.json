@@ -20,7 +20,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite & ./services/run/run & ./services/scoket_run/scoket_run",
     "build": "vue-tsc --noEmit && vite build && electron-builder",
     "preview": "vite preview"
   },
@@ -39,9 +39,13 @@
     "@element-plus/icons-vue": "^2.3.1",
     "@iconify/vue": "^5.0.0",
     "@tailwindcss/vite": "^4.1.11",
+    "@vueuse/core": "^13.6.0",
     "daisyui": "^5.0.50",
     "element-plus": "^2.10.5",
+    "is-electron": "^2.2.2",
     "tailwindcss": "^4.1.11",
+    "use-element-plus-theme": "^0.0.5",
+    "vue-dompurify-html": "^5.3.0",
     "vue-json-viewer": "^2.2.22",
     "vue-router": "^4.5.1"
   }

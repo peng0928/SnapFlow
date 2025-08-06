@@ -1,54 +1,58 @@
-import { ipcRenderer, contextBridge } from 'electron'
+import {ipcRenderer, contextBridge, shell} from 'electron'
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
-  },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.off(channel, ...omit)
-  },
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.send(channel, ...omit)
-  },
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.invoke(channel, ...omit)
-  },
+    on(...args: Parameters<typeof ipcRenderer.on>) {
+        const [channel, listener] = args
+        return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
+    },
+    off(...args: Parameters<typeof ipcRenderer.off>) {
+        const [channel, ...omit] = args
+        return ipcRenderer.off(channel, ...omit)
+    },
+    send(...args: Parameters<typeof ipcRenderer.send>) {
+        const [channel, ...omit] = args
+        return ipcRenderer.send(channel, ...omit)
+    },
+    invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
+        const [channel, ...omit] = args
+        return ipcRenderer.invoke(channel, ...omit)
+    },
+    openExternal: (url) => {
+        console.log('Opening URL:', url, shell); // ✅ 检查是否调用
+        return shell.openExternal(url);
+    }
 
-  // You can expose other APTs you need here.
-  // ...
+    // You can expose other APTs you need here.
+    // ...
 })
 
 // --------- Preload scripts loading ---------
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
-  return new Promise((resolve) => {
-    if (condition.includes(document.readyState)) {
-      resolve(true)
-    } else {
-      document.addEventListener('readystatechange', () => {
+    return new Promise((resolve) => {
         if (condition.includes(document.readyState)) {
-          resolve(true)
+            resolve(true)
+        } else {
+            document.addEventListener('readystatechange', () => {
+                if (condition.includes(document.readyState)) {
+                    resolve(true)
+                }
+            })
         }
-      })
-    }
-  })
+    })
 }
 
 const safeDOM = {
-  append(parent: HTMLElement, child: HTMLElement) {
-    if (!Array.from(parent.children).find(e => e === child)) {
-      return parent.appendChild(child)
-    }
-  },
-  remove(parent: HTMLElement, child: HTMLElement) {
-    if (Array.from(parent.children).find(e => e === child)) {
-      return parent.removeChild(child)
-    }
-  },
+    append(parent: HTMLElement, child: HTMLElement) {
+        if (!Array.from(parent.children).find(e => e === child)) {
+            return parent.appendChild(child)
+        }
+    },
+    remove(parent: HTMLElement, child: HTMLElement) {
+        if (Array.from(parent.children).find(e => e === child)) {
+            return parent.removeChild(child)
+        }
+    },
 }
 
 /**
@@ -58,8 +62,8 @@ const safeDOM = {
  * https://matejkustec.github.io/SpinThatShit
  */
 function useLoading() {
-  const className = `tech-progress-bar`
-  const styleContent = `
+    const className = `tech-progress-bar`
+    const styleContent = `
 @keyframes progress-glow {
   0% { box-shadow: 0 0 5px #00f2ff, 0 0 10px #00f2ff; }
   100% { box-shadow: 0 0 15px #00f2ff, 0 0 30px #00f2ff; }
@@ -123,13 +127,13 @@ function useLoading() {
   animation: pulse 2s ease-in-out infinite;
 }
     `
-  const oStyle = document.createElement('style')
-  const oDiv = document.createElement('div')
+    const oStyle = document.createElement('style')
+    const oDiv = document.createElement('div')
 
-  oStyle.id = 'app-loading-style'
-  oStyle.innerHTML = styleContent
-  oDiv.className = 'app-loading-wrap'
-  oDiv.innerHTML = `
+    oStyle.id = 'app-loading-style'
+    oStyle.innerHTML = styleContent
+    oDiv.className = 'app-loading-wrap'
+    oDiv.innerHTML = `
     <div class="loading-title">系统正在加载...</div>
     <div class="${className}-container">
       <div class="${className}-track">
@@ -142,50 +146,50 @@ function useLoading() {
     </div>
   `
 
-  // 获取DOM元素
-  const percentageEl = oDiv.querySelector(`.${className}-percentage`)
-  const fillEl = oDiv.querySelector(`.${className}-fill`)
+    // 获取DOM元素
+    const percentageEl = oDiv.querySelector(`.${className}-percentage`)
+    const fillEl = oDiv.querySelector(`.${className}-fill`)
 
-  // 精确控制1500ms完成进度
-  let startTime = null
-  const duration = 1800 // 1.5秒
+    // 精确控制1500ms完成进度
+    let startTime = null
+    const duration = 1800 // 1.5秒
 
-  function animateProgress(timestamp) {
-    if (!startTime) startTime = timestamp
-    const elapsed = timestamp - startTime
-    const progress = Math.min(elapsed / duration, 1)
+    function animateProgress(timestamp) {
+        if (!startTime) startTime = timestamp
+        const elapsed = timestamp - startTime
+        const progress = Math.min(elapsed / duration, 1)
 
-    // 更新UI
-    const percent = Math.floor(progress * 100)
-    percentageEl.textContent = `${percent}%`
-    fillEl.style.width = `${progress * 100}%`
+        // 更新UI
+        const percent = Math.floor(progress * 100)
+        percentageEl.textContent = `${percent}%`
+        fillEl.style.width = `${progress * 100}%`
 
-    // 继续动画直到完成
-    if (progress < 1) {
-      requestAnimationFrame(animateProgress)
+        // 继续动画直到完成
+        if (progress < 1) {
+            requestAnimationFrame(animateProgress)
+        }
     }
-  }
 
-  return {
-    appendLoading() {
-      safeDOM.append(document.head, oStyle)
-      safeDOM.append(document.body, oDiv)
-      requestAnimationFrame(animateProgress)
-    },
-    removeLoading() {
-      safeDOM.remove(document.head, oStyle)
-      safeDOM.remove(document.body, oDiv)
-    },
-  }
+    return {
+        appendLoading() {
+            safeDOM.append(document.head, oStyle)
+            safeDOM.append(document.body, oDiv)
+            requestAnimationFrame(animateProgress)
+        },
+        removeLoading() {
+            safeDOM.remove(document.head, oStyle)
+            safeDOM.remove(document.body, oDiv)
+        },
+    }
 }
 
 // ----------------------------------------------------------------------
 
-const { appendLoading, removeLoading } = useLoading()
+const {appendLoading, removeLoading} = useLoading()
 domReady().then(appendLoading)
 
 window.onmessage = (ev) => {
-  ev.data.payload === 'removeLoading' && removeLoading()
+    ev.data.payload === 'removeLoading' && removeLoading()
 }
 
 setTimeout(removeLoading, 2100)

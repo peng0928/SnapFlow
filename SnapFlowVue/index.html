@@ -5,11 +5,24 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
-
     <title>灵嗅</title>
+    <style>
+        :root {
+            /* 默认亮主题 */
+            --bg-color: #fff;
+            background: var(--bg-color);
+        }
+
+        :root.dark {
+            --bg-color: #000;
+        }
+    </style>
 </head>
 <body>
+
+
 <div id="app"></div>
 <script type="module" src="/src/main.ts"></script>
+
 </body>
 </html>
