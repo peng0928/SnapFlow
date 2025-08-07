@@ -3,13 +3,13 @@
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "YourAppID",
   "asar": true,
-  "productName": "YourAppName",
+  "productName": "灵嗅",
   "directories": {
     "output": "release/${version}"
   },
   "files": [
     "dist",
-    "dist-electron"
+    "dist-electron",
   ],
   "mac": {
     "target": [
@@ -39,5 +39,21 @@
       "AppImage"
     ],
     "artifactName": "${productName}-Linux-${version}.${ext}"
-  }
+  },
+  extraResources: [
+    {
+      from: "services/run",
+      to: "services/run",
+      filter: [
+        "**/*"
+      ]
+    },
+    {
+      from: "services/scoket_run",
+      to: "services/scoket_run",
+      filter: [
+        "**/*"
+      ]
+    }
+  ]
 }

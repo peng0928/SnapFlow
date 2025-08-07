@@ -46,8 +46,8 @@
         </div>
       </div>
 
-      <div class="mb-3">
-        <SwitchVue/>
+      <div class="mb-3" >
+<!--        <SwitchVue v-model="isDarkMode"/>-->
       </div>
     </el-header>
 
@@ -56,7 +56,8 @@
       <div style="height: 100%;">
         <el-splitter layout="vertical">
           <el-splitter-panel>
-            <div class="overflow-y-auto no-scrollbar" style="height: 100%; scrollbar-width: none; -ms-overflow-style: none;">
+            <div class="overflow-y-auto no-scrollbar"
+                 style="height: 100%; scrollbar-width: none; -ms-overflow-style: none;">
               <el-table
                   :data="filteredRequests"
                   style="width: 100%"
@@ -205,7 +206,13 @@
                     <span>预览</span>
                   </div>
                 </template>
-                <div v-dompurify-html="selectedRequest.text" class="pl-3 pr-3"></div>
+                <div v-if="selectedRequest.type==='json'">
+                  <JsonViewer
+                      :data="jsonSource"
+                      :darkMode="isDarkMode"
+                  />
+                </div>
+                <el-text v-dompurify-html="selectedRequest.text" class="pl-3 pr-3" v-else></el-text>
               </el-tab-pane>
               <el-tab-pane label="响应">
                 <template #label>
@@ -216,7 +223,7 @@
                     <span>响应</span>
                   </div>
                 </template>
-                <div class="pl-3 pr-3">{{ selectedRequest.text }}</div>
+                <el-text class="pl-3 pr-3">{{ selectedRequest.text }}</el-text>
               </el-tab-pane>
               <el-tab-pane>
                 <template #label>
@@ -253,23 +260,24 @@
 import {ref, computed, onMounted, watch} from 'vue'
 import {VideoPlay, Delete, Search, Download, Document, Connection, Picture} from '@element-plus/icons-vue'
 import {SemiSelect, Position, View, Pointer, Timer} from '@element-plus/icons-vue'
-import 'vue-json-viewer/style.css'
-import SwitchVue from '../components/model/SwitchVue.vue'
+// import SwitchVue from '../components/model/SwitchVue.vue'
+import {JsonViewer} from '@anilkumarthakur/vue3-json-viewer';
+import '@anilkumarthakur/vue3-json-viewer/styles.css';
 // 请求记录
 const requests = ref([])
 const selectedRequest = ref(null)
 const isRecording = ref(true)
 const filterText = ref('')
 const activeView = ref('all')
+const isDarkMode = ref(false);
 
-
+const jsonSource = ref({})
 // 模拟一些初始数据
-
 const ws = ref()
 const isConnected = ref(false)
 const reconnectAttempts = ref(0)
-const maxReconnectAttempts = 5
-const reconnectDelay = 3000
+const maxReconnectAttempts = 100
+const reconnectDelay = 1000
 
 
 const initWebSocket = () => {
@@ -321,7 +329,7 @@ const reconnect = () => {
 
 // 初始化模拟数据
 onMounted(() => {
-  initWebSocket()
+  // initWebSocket()
 })
 watch(isConnected, (newVal, oldVal) => {
   if (!newVal && oldVal) { // 从连接状态变为断开状态
@@ -423,8 +431,13 @@ const handleMenuSelect = (index) => {
 
 // 处理行点击
 const handleRowClick = (row) => {
-  console.log(row)
+  console.log(isDarkMode.value)
   selectedRequest.value = row
+  try {
+    jsonSource.value = JSON.parse(row.text)
+  } catch (error) {
+    jsonSource.value = {}
+  }
 }
 
 // 获取状态标签类型
@@ -520,7 +533,9 @@ const openInBrowser = (url) => {
 </script>
 
 <style scoped>
-
+.box {
+  margin-top: 1rem;
+}
 
 .main-content {
   padding: 0;

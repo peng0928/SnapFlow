@@ -9,7 +9,7 @@ declare namespace NodeJS {
      * ```tree
      * ├─┬ dist-electron
      * │ ├─┬ main
-     * │ │ └── index.ts    > Electron-Main
+     * │ │ └── index.js    > Electron-Main
      * │ └─┬ preload
      * │   └── index.mjs   > Preload-Scripts
      * ├─┬ dist

@@ -1,6 +1,8 @@
 import json
 import socket
 import time
+
+import mitmproxy
 from mitmproxy import http
 from loguru import logger
 
@@ -11,10 +13,12 @@ TCP_PORT = 2025
 
 def get_timings(flow):
     """计算时间指标"""
+    start_time = flow.request.timestamp_start
+    end_time = flow.response.timestamp_end
     return {
-        "start": flow.request.timestamp_start,
-        "end": flow.request.timestamp_end,
-        "cost": round(flow.response.timestamp_end - flow.response.timestamp_start, 3),
+        "start": start_time,
+        "end": end_time,
+        "cost": round(end_time - start_time, 3)
     }
 
 
@@ -49,7 +53,7 @@ def handle_type(headers, text, url):
         "application/xhtml+xml": "xhtml",
         "application/xml": "xml",
         "application/atom+xml": "atom",
-        "application/json": "json",
+        "application/json": "Json",
         "application/pdf": "pdf",
         "application/msword": "word",
         "application/octet-stream": "binary",
@@ -59,6 +63,31 @@ def handle_type(headers, text, url):
         # 其他常见类型
         "multipart/form-data": "multipart"
     }
+    file_type_mapping = {
+        ".js": "javascript",
+        ".json": "Json",
+        ".css": "css",
+        ".html": "html",
+        ".jpg": "jpg",
+        ".png": "png",
+        ".gif": "gif",
+        ".pdf": "pdf",
+        ".doc": "word",
+        ".docx": "word",
+        ".xls": "excel",
+        ".xlsx": "excel",
+        ".ppt": "ppt",
+        ".pptx": "ppt",
+        ".rar": "rar",
+        ".7z": "7z",
+        ".tar": "tar",
+        ".gz": "gz",
+        ".bz2": "bz2",
+        ".zip": "zip",
+        ".mp3": "mp3",
+        ".mp4": "mp4",
+        ".avi": "avi",
+    }
 
     for prefix, type_name in content_type_mapping.items():
         if content_type.startswith(prefix):
@@ -66,9 +95,13 @@ def handle_type(headers, text, url):
             break
     try:
         json.loads(text)
-        return "json"
+        return "Json"
     except Exception:
         pass
+    for suffix, type_name in file_type_mapping.items():
+        if url.endswith(suffix):
+            content_type = type_name
+            break
 
     return content_type
 
@@ -97,6 +130,7 @@ def response(flow: http.HTTPFlow):
     text = content.decode(errors='ignore')
     url = flow.request.url
     scheme = flow.request.scheme
+    state = flow.get_state()
     data = {
         "id": hash(f"{flow.id}-{time.time()}"),  # 需与请求相同ID
         "method": flow.request.method,
@@ -115,5 +149,17 @@ def response(flow: http.HTTPFlow):
         "responseBody": text,
         "timings": get_timings(flow)  # 计算耗时
     }
+
     send_to_tcp(data)
+
+
+def websocket_message(flow: http.HTTPFlow):
+    # 检查是否是 WebSocket 消息
+    if flow.websocket:
+        # 获取最新消息（from_client 或 from_server）
+        last_msg = flow.websocket.messages[-1]
+        url = f"ws://{flow.request.host}:{flow.request.port}{flow.request.path}"
+        print(url, last_msg)
+
+
 logger.info("mitmdump启动成功")

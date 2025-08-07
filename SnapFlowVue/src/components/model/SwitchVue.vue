@@ -7,11 +7,20 @@
   </label>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {useDark, useToggle} from '@vueuse/core';
 
+const props = defineProps<{
+  modelValue: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void
+}>()
+
 const isDark = useDark();  // 检测当前是否为深色模式
-const toggleDark = (e) => {  // 添加事件参数e
+const toggleDark = () => {  // 添加事件参数e
+  emit('update:modelValue', !props.modelValue)
   const transition = document.startViewTransition(() => {
     document.documentElement.classList.toggle("dark");
   });

@@ -1,4 +1,6 @@
 import json
+import os
+
 from loguru import logger
 import asyncio
 import websockets
@@ -14,6 +16,7 @@ BUFFER_SIZE = 1024 * 1024 * 60  # 1MB
 # WebSocket客户端集合
 connected_clients = set()
 clientQueue = Queue()
+port = 8765
 
 
 class WebSocketAddon:
@@ -56,14 +59,28 @@ class WebSocketAddon:
             await asyncio.sleep(5)
 
     async def run_server(self):
+        self.clear_process()
         asyncio.create_task(asyncio.to_thread(self.tcp_server))
         self.server = await websockets.serve(
             self.handle_connection,
             "localhost",
-            8765
+            port
         )
         logger.info("WebSocket服务器已启动，监听 ws://localhost:8765")
         # asyncio.create_task(asyncio.to_thread(await self.periodic_broadcast()))
+
+    @staticmethod
+    def clear_process():
+        command = f"lsof -i :{port} | grep LISTEN | awk '{{print $2}}'"
+        pids = os.popen(command).read().split()  # 获取所有 PID（列表）
+
+        if pids:
+            logger.info(f"Found processes {pids} using port {port}. Killing them...")
+            for pid in pids:
+                os.kill(int(pid), 9)  # 逐个终止
+            logger.info("All processes killed.")
+        else:
+            logger.info(f"No process found using port {port}.")
 
     def tcp_server(self):
         """运行TCP服务端（在独立线程中）"""
