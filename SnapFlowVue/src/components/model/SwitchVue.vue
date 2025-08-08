@@ -20,7 +20,6 @@ const emit = defineEmits<{
 
 const isDark = useDark();  // 检测当前是否为深色模式
 const toggleDark = () => {  // 添加事件参数e
-  emit('update:modelValue', !props.modelValue)
   const transition = document.startViewTransition(() => {
     document.documentElement.classList.toggle("dark");
   });
@@ -45,7 +44,7 @@ const toggleDark = () => {  // 添加事件参数e
           ],
         },
         {
-          duration: 500,
+          duration: 650,
           pseudoElement: "::view-transition-new(root)",
         }
     );

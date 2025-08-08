@@ -2,7 +2,6 @@ import json
 import socket
 import time
 
-import mitmproxy
 from mitmproxy import http
 from loguru import logger
 
@@ -123,6 +122,10 @@ def request(flow: http.HTTPFlow):
     # send_to_tcp(data)
 
 
+def to_dict(data):
+    return dict(data.items())
+
+
 def response(flow: http.HTTPFlow):
     """发送响应数据"""
     responseHeaders = dict(flow.response.headers) or {}
@@ -130,7 +133,16 @@ def response(flow: http.HTTPFlow):
     text = content.decode(errors='ignore')
     url = flow.request.url
     scheme = flow.request.scheme
-    state = flow.get_state()
+    params = to_dict(flow.request.query)
+
+    body = ""
+    if flow.request.urlencoded_form:
+        body = to_dict(flow.request.urlencoded_form)
+    try:
+        body = flow.request.json()
+    except:
+        pass
+
     data = {
         "id": hash(f"{flow.id}-{time.time()}"),  # 需与请求相同ID
         "method": flow.request.method,
@@ -140,6 +152,8 @@ def response(flow: http.HTTPFlow):
         "type": handle_type(responseHeaders, text, url),
         "scheme": scheme,
         "text": text,
+        "params": params,
+        "body": body,
         "content": "",
         "cookie": "",
         "size": len(flow.response.content) if flow.response.content else 0,

@@ -197,6 +197,37 @@
                   </div>
                 </div>
               </el-tab-pane>
+              <el-tab-pane label="">
+                <template #label>
+                  <div class="flex gap-1 items-center text-center">
+                    <el-icon>
+                      <Key/>
+                    </el-icon>
+                    <span>参数</span>
+                  </div>
+                </template>
+                <div v-if="check_if(selectedRequest.params)">
+                  <div>
+                    <div class="text-md font-semibold ">URL参数</div>
+                  </div>
+                  <div class="border-t border-gray-300 my-1 pb-1"></div>
+                  <JsonViewer
+                      :data="try_parse(selectedRequest.params)"
+                      :darkMode="isDarkMode"
+                  />
+                </div>
+                <div v-if="check_if(selectedRequest.body)">
+                  <div>
+                    <div class="text-md font-semibold text-blue-600">请求参数</div>
+                  </div>
+                  <div class="border-t border-gray-300 my-1 pb-1"></div>
+                  <JsonViewer
+                      :data="try_parse(selectedRequest.body)"
+                      :darkMode="isDarkMode"
+                  />
+                </div>
+
+              </el-tab-pane>
               <el-tab-pane>
                 <template #label>
                   <div class="flex gap-1 items-center text-center">
@@ -206,7 +237,7 @@
                     <span>预览</span>
                   </div>
                 </template>
-                <div v-if="selectedRequest.type==='json' || selectedRequest.type==='Json'" >
+                <div v-if="selectedRequest.type==='json' || selectedRequest.type==='Json'">
                   <JsonViewer
                       :data="jsonSource"
                       :darkMode="isDarkMode"
@@ -259,7 +290,7 @@
 <script setup>
 import {ref, computed, onMounted, watch} from 'vue'
 import {VideoPlay, Delete, Search, Download, Document, Connection, Picture} from '@element-plus/icons-vue'
-import {SemiSelect, Position, View, Pointer, Timer} from '@element-plus/icons-vue'
+import {SemiSelect, Position, View, Pointer, Timer, Key} from '@element-plus/icons-vue'
 import SwitchVue from './components/model/SwitchVue.vue'
 import {JsonViewer} from '@anilkumarthakur/vue3-json-viewer';
 import '@anilkumarthakur/vue3-json-viewer/styles.css';
@@ -269,7 +300,7 @@ const selectedRequest = ref(null)
 const isRecording = ref(true)
 const filterText = ref('')
 const activeView = ref('all')
-const isDarkMode = ref(false);
+const isDarkMode = ref(true);
 
 const jsonSource = ref({})
 // 模拟一些初始数据
@@ -529,6 +560,18 @@ const openInBrowser = (url) => {
   console.log(url)
   window.ipcRenderer.openExternal(url);
 }
+const try_parse = (e) => {
+  try {
+    e = JSON.parse(e)
+  } catch (err) {
+  }
+  return e;
+}
+const check_if = (e) => {
+  e = try_parse(e)
+  return Object.keys(e).length > 0 || e.length > 0;
+}
+
 </script>
 
 <style scoped>
