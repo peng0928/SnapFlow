@@ -1,7 +1,7 @@
 <template>
   <el-container class="main-content">
     <!-- 顶部工具栏 -->
-    <el-header height="10px" class="flex mt-5  gap-3 tems-center text-center justify-between">
+    <el-header height="10px" class="flex mt-5  gap-3 items-center text-center justify-between">
       <div class="flex items-center text-center gap-1">
         <el-button-group>
           <el-button :type="isRecording ? 'primary' : ''" @click="toggleRecording" size="small">
@@ -15,6 +15,9 @@
               <Delete/>
             </el-icon>
             清空
+          </el-button>
+          <el-button @click="postData" size="small">
+            测试
           </el-button>
         </el-button-group>
 
@@ -46,8 +49,8 @@
         </div>
       </div>
 
-      <div class="mb-3">
-        <SwitchVue v-model="isDarkMode"/>
+      <div class="">
+        <SwitchVue/>
       </div>
     </el-header>
 
@@ -67,6 +70,7 @@
                   @row-click="handleRowClick"
                   empty-text="没有捕获到网络请求"
                   class=""
+                  @row-contextmenu="handleRightClick"
               >
                 <el-table-column prop="status" label="状态" width="70" align="center">
                   <template #default="{ row }">
@@ -123,6 +127,43 @@
                   </template>
                 </el-table-column>
               </el-table>
+
+              <!-- 右键菜单 -->
+              <div v-if="contextMenu.visible"
+                   :style="{left: contextMenu.left + 'px', top: contextMenu.top + 'px'}"
+                   class="context-menu text-xs p-1 text-nowrap rounded">
+                <!-- 关闭按钮 -->
+                <div class="close-btn" @click.stop="closeContextMenu">
+                  <img src="./assets/svg/MaterialSymbolsLightCancelPresentationOutline.svg" alt="Icon" width="25"
+                       height="25">
+                </div>
+
+                <div @click="handleMenuClick('edit')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                  <img src="./assets/svg/IconParkCurling.svg" alt="Icon" width="15" height="15">
+                  复制 CURL
+                </div>
+                <div @click="handleMenuClick('delete')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                  <img src="./assets/svg/MaterialSymbolsSendAndArchiveOutlineRounded.svg" alt="Icon" width="15"
+                       height="15">
+                  复制 Request
+                </div>
+                <div @click="handleMenuClick('copy')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                  <img src="./assets/svg/LineMdCookieCheck.svg" alt="Icon" width="15" height="15">
+                  复制 Cookie
+                </div>
+                <div @click="handleMenuClick('copy')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                  <img src="./assets/svg/JamHeader.svg" alt="Icon" width="15" height="15">
+                  复制 Headers
+                </div>
+                <div @click="handleMenuClick('copy')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                  <img src="./assets/svg/OuiTokenParameter.svg" alt="Icon" width="15" height="15">
+                  复制 请求参数
+                </div>
+                <div @click="handleMenuClick('copy')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                  <img src="./assets/svg/IcRoundReplay.svg" alt="Icon" width="15" height="15">
+                  重发请求
+                </div>
+              </div>
             </div>
           </el-splitter-panel>
           <el-splitter-panel v-if="selectedRequest">
@@ -288,6 +329,7 @@
 </template>
 
 <script setup>
+import axios from 'axios'
 import {ref, computed, onMounted, watch} from 'vue'
 import {VideoPlay, Delete, Search, Download, Document, Connection, Picture} from '@element-plus/icons-vue'
 import {SemiSelect, Position, View, Pointer, Timer, Key} from '@element-plus/icons-vue'
@@ -520,35 +562,6 @@ const formatSize = (bytes) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-// 获取 URL 路径部分
-const getUrlPath = (url) => {
-  try {
-    const u = new URL(url)
-    return u.pathname + u.search + u.hash
-  } catch {
-    return url
-  }
-}
-
-// 获取 URL 域名部分
-const getUrlDomain = (url) => {
-  try {
-    return new URL(url).host
-  } catch {
-    return url
-  }
-}
-
-const handle_type = (row) => {
-  const _type = row.type
-  const text = row.text
-  if (_type === 'png') {
-    console.log(text)
-    return _type
-  }
-  return _type
-}
-
 const handle_png = (row) => {
   const _type = row.type
   const url = row.url.toLowerCase();
@@ -572,12 +585,65 @@ const check_if = (e) => {
   return Object.keys(e).length > 0 || e.length > 0;
 }
 
+const contextMenu = ref({
+  visible: false,
+  left: 0,
+  top: 0,
+  row: null,
+  index: -1
+})
+
+const handleRightClick = (row, column, event) => {
+  event.preventDefault() // 阻止默认右键菜单
+  contextMenu.value = {
+    visible: true,
+    left: event.clientX,
+    top: event.clientY,
+    row,
+    index: filteredRequests.value.indexOf(row)
+  }
+  document.addEventListener('click', closeContextMenu)
+}
+
+const closeContextMenu = () => {
+  contextMenu.value.visible = false
+  document.removeEventListener('click', closeContextMenu)
+}
+
+const handleMenuClick = (action) => {
+  console.log(`执行 ${action} 操作`, contextMenu.value.row)
+  closeContextMenu()
+
+  // 根据action执行不同操作
+  switch (action) {
+    case 'edit':
+      // 编辑逻辑
+      break
+    case 'delete':
+      // 删除逻辑
+      tableData.value.splice(contextMenu.value.index, 1)
+      break
+    case 'copy':
+      // 复制逻辑
+      break
+  }
+}
+
+const postData = async () => {
+
+  try {
+    const response = await axios.post('http://localhost:12027/set_port', {
+      port: "10086" // 示例数据
+    })
+    console.log(response.json)
+  } catch (error) {
+    console.error('Error:', error)
+  } finally {
+  }
+}
 </script>
 
 <style scoped>
-.box {
-  margin-top: 1rem;
-}
 
 .main-content {
   padding: 0;
@@ -586,19 +652,6 @@ const check_if = (e) => {
   height: calc(100vh);
   background-color: var(--el-bg-color-page);
   overflow: hidden;
-}
-
-
-.url-cell {
-  display: flex;
-  align-items: center;
-}
-
-.url-text {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 
@@ -614,8 +667,36 @@ const check_if = (e) => {
   overflow: auto;
 }
 
-
 .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+
+.context-menu {
+  position: fixed;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+}
+
+.context-menu div {
+  padding: 8px 15px;
+  cursor: pointer;
+}
+
+/* 关闭按钮样式 */
+.close-btn {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  color: #999;
+}
+
 </style>
