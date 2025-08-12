@@ -44,6 +44,9 @@ importers:
       use-element-plus-theme:
         specifier: ^0.0.5
         version: 0.0.5(@types/node@24.1.0)(rollup@4.46.2)(typescript@5.8.3)(vite@5.4.19(@types/node@24.1.0)(lightningcss@1.30.1))
+      vue-clipboard3:
+        specifier: ^2.0.0
+        version: 2.0.0
       vue-dark-switch:
         specifier: ^1.0.6
         version: 1.0.6(vite@5.4.19(@types/node@24.1.0)(lightningcss@1.30.1))(vue@3.5.18(typescript@5.8.3))
@@ -2044,6 +2047,9 @@ packages:
 
   vscode-uri@3.1.0:
     resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
+
+  vue-clipboard3@2.0.0:
+    resolution: {integrity: sha512-Q9S7dzWGax7LN5iiSPcu/K1GGm2gcBBlYwmMsUc5/16N6w90cbKow3FnPmPs95sungns4yvd9/+JhbAznECS2A==}
 
   vue-dark-switch@1.0.6:
     resolution: {integrity: sha512-M8P2pdoEfO98Zgj3OMDjOgSKTU961oqZoOUidzaP61JzfqVbsEa7KUvQ1pNVx7oeNNXJiYMN147eYxb2oZzPKw==}
@@ -4186,6 +4192,10 @@ snapshots:
       lightningcss: 1.30.1
 
   vscode-uri@3.1.0: {}
+
+  vue-clipboard3@2.0.0:
+    dependencies:
+      clipboard: 2.0.11
 
   vue-dark-switch@1.0.6(vite@5.4.19(@types/node@24.1.0)(lightningcss@1.30.1))(vue@3.5.18(typescript@5.8.3)):
     dependencies:

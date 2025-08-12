@@ -16,9 +16,9 @@
             </el-icon>
             清空
           </el-button>
-          <el-button @click="postData" size="small">
-            测试
-          </el-button>
+<!--          <el-button @click="postData('10086')" size="small">-->
+<!--            测试-->
+<!--          </el-button>-->
         </el-button-group>
 
         <el-input
@@ -69,7 +69,6 @@
                   highlight-current-row
                   @row-click="handleRowClick"
                   empty-text="没有捕获到网络请求"
-                  class=""
                   @row-contextmenu="handleRightClick"
               >
                 <el-table-column prop="status" label="状态" width="70" align="center">
@@ -79,7 +78,7 @@
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column prop="method" label="方法" width="90" align="center">
+                <el-table-column prop="method" label="方法" width="100" align="center">
                   <template #default="{ row }">
                     <el-tag :type="getMethodTagType(row.method)" size="small">
                       {{ row.method }}
@@ -95,12 +94,12 @@
                 </el-table-column>
                 <el-table-column prop="url" label="URL" min-width="400">
                   <template #default="{ row }">
-                    <div class="flex gap-1 items-center text-center">
-                      <el-icon class="type-icon">
-                        <component :is="getRequestTypeIcon(row.type)"/>
-                      </el-icon>
-                      <!--                      <span class="url-text">{{ // getUrlPath(row.url) }}</span>-->
-                      <el-text truncated tag="p">{{ row.url }}</el-text>
+                    <div class="flex gap-2 items-center text-center">
+                      <img src="./assets/svg/CatppuccinUrl.svg" alt="Icon" width="15"
+                           height="15">
+                      <el-tag type="info" >
+                        {{ row.url }}
+                      </el-tag>
                     </div>
 
                   </template>
@@ -108,54 +107,76 @@
                 <el-table-column prop="domain" label="类型" width="100">
                   <template #default="{ row }">
                     <img :src="row.url" alt="" v-if="handle_png(row)" width="50" height="50"/>
-                    <div v-else class="flex items-center text-center gap-1">
-                      <el-icon class="type-icon">
-                        <component :is="getRequestTypeIcon(row.type)"/>
-                      </el-icon>
-                      <div v-dompurify-html="row.type"/>
+                    <div v-else class="flex items-center text-center gap-1 ">
+                      <div class="bg-green-200 rounded ">
+                        <img src="./assets/svg/BiFiletypeJson.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-if="row.type.toLowerCase() === 'json'">
+                        <img src="./assets/svg/TablerFileTypeHtml.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-else-if="row.type.toLowerCase() === 'html'">
+                        <img src="./assets/svg/AntDesignJavaScriptOutlined.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-else-if="row.type.toLowerCase() === 'js'">
+                        <img src="./assets/svg/MaterialSymbolsFilePng.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-else-if="row.type.toLowerCase() === 'png'">
+                        <img src="./assets/svg/MdiFileJpgBox.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-else-if="row.type.toLowerCase() === 'jpg'">
+                        <img src="./assets/svg/MaterialSymbolsGif2Sharp.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-else-if="row.type.toLowerCase() === 'gif'">
+                        <img src="./assets/svg/FluentDocumentCss16Filled.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-else-if="row.type.toLowerCase() === 'css'">
+                        <img src="./assets/svg/MaterialSymbolsTextFieldsRounded.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-else-if="row.type.toLowerCase() === 'text'">
+                        <img src="./assets/svg/MaterialSymbolsTextFieldsRounded.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-else-if="row.type.toLowerCase() === 'txt'">
+                        <img src="./assets/svg/UiwFileUnknown.svg" alt="Icon" width="30"
+                             height="30" class="p-1" v-else>
+                      </div>
                     </div>
                   </template>
                 </el-table-column>
                 <el-table-column prop="size" label="大小" width="100">
                   <template #default="{ row }">
-                    {{ formatSize(row.size) }}
+                    <el-tag type="primary">
+                      {{ formatSize(row.size) }}
+                    </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column prop="time" label="耗时" width="100">
-                  <template #default="{ row }">
-                    {{ row.timings.cost ? `${row.timings.cost}ms` : '-' }}
-                  </template>
-                </el-table-column>
+                <!--                <el-table-column prop="time" label="耗时" width="100">-->
+                <!--                  <template #default="{ row }">-->
+                <!--                    {{ row.timings.cost ? `${row.timings.cost}ms` : '-' }}-->
+                <!--                  </template>-->
+                <!--                </el-table-column>-->
               </el-table>
 
               <!-- 右键菜单 -->
               <div v-if="contextMenu.visible"
                    :style="{left: contextMenu.left + 'px', top: contextMenu.top + 'px'}"
-                   class="context-menu text-xs p-1 text-nowrap rounded">
+                   class="context-menu text-xs p-1 text-nowrap rounded "
+                   :class="handleRowClass()"
+              >
                 <!-- 关闭按钮 -->
                 <div class="close-btn" @click.stop="closeContextMenu">
                   <img src="./assets/svg/MaterialSymbolsLightCancelPresentationOutline.svg" alt="Icon" width="25"
                        height="25">
                 </div>
 
-                <div @click="handleMenuClick('edit')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                <div @click="handleMenuClick('curl')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
                   <img src="./assets/svg/IconParkCurling.svg" alt="Icon" width="15" height="15">
                   复制 CURL
                 </div>
-                <div @click="handleMenuClick('delete')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                <div @click="handleMenuClick('request')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
                   <img src="./assets/svg/MaterialSymbolsSendAndArchiveOutlineRounded.svg" alt="Icon" width="15"
                        height="15">
                   复制 Request
                 </div>
-                <div @click="handleMenuClick('copy')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                <div @click="handleMenuClick('cookie')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
                   <img src="./assets/svg/LineMdCookieCheck.svg" alt="Icon" width="15" height="15">
                   复制 Cookie
                 </div>
-                <div @click="handleMenuClick('copy')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                <div @click="handleMenuClick('header')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
                   <img src="./assets/svg/JamHeader.svg" alt="Icon" width="15" height="15">
                   复制 Headers
                 </div>
-                <div @click="handleMenuClick('copy')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
+                <div @click="handleMenuClick('params')" class="hover:bg-blue-300 flex gap-3 items-center text-center">
                   <img src="./assets/svg/OuiTokenParameter.svg" alt="Icon" width="15" height="15">
                   复制 请求参数
                 </div>
@@ -255,6 +276,7 @@
                   <JsonViewer
                       :data="try_parse(selectedRequest.params)"
                       :darkMode="isDarkMode"
+                      class="break-all"
                   />
                 </div>
                 <div v-if="check_if(selectedRequest.body)">
@@ -265,9 +287,9 @@
                   <JsonViewer
                       :data="try_parse(selectedRequest.body)"
                       :darkMode="isDarkMode"
+                      class="break-all"
                   />
                 </div>
-
               </el-tab-pane>
               <el-tab-pane>
                 <template #label>
@@ -278,10 +300,11 @@
                     <span>预览</span>
                   </div>
                 </template>
-                <div v-if="selectedRequest.type==='json' || selectedRequest.type==='Json'">
+                <div v-if="selectedRequest.type.toLowerCase() === 'json'">
                   <JsonViewer
                       :data="jsonSource"
                       :darkMode="isDarkMode"
+                      class="break-all"
                   />
                 </div>
                 <el-text v-dompurify-html="selectedRequest.text" class="pl-3 pr-3" v-else></el-text>
@@ -318,6 +341,42 @@
                   </el-timeline-item>
                 </el-timeline>
               </el-tab-pane>
+              <el-tab-pane>
+                <template #label>
+                  <div class="flex gap-1 items-center text-center">
+                    <img src="./assets/svg/EmojioneCookie.svg" alt="Icon" width="15" height="15">
+                    <span>Cookie</span>
+                  </div>
+
+
+                </template>
+
+                <div v-if="check_cookie(selectedRequest.requestHeaders)">
+                  <div>
+                    <el-text class="text-md font-semibold ">请求Cookie</el-text>
+                  </div>
+                  <div class="border-t border-gray-300 my-1 pb-1"></div>
+                  <JsonViewer
+                      :data="get_cookie(selectedRequest.requestHeaders)"
+                      :darkMode="isDarkMode"
+                      class="break-all"
+
+                  />
+                </div>
+
+                <div v-if="check_cookie(selectedRequest.responseHeaders)" class="pt-5">
+                  <div>
+                    <div class="text-md font-semibold text-yellow-600">响应Cookie</div>
+                  </div>
+                  <div class="border-t border-gray-300 my-1 pb-1"></div>
+                  <JsonViewer
+                      :data="get_cookie(selectedRequest.responseHeaders)"
+                      :darkMode="isDarkMode"
+                      class="break-all"
+                  />
+                </div>
+
+              </el-tab-pane>
 
             </el-tabs>
           </el-splitter-panel>
@@ -330,12 +389,32 @@
 
 <script setup>
 import axios from 'axios'
-import {ref, computed, onMounted, watch} from 'vue'
-import {VideoPlay, Delete, Search, Download, Document, Connection, Picture} from '@element-plus/icons-vue'
-import {SemiSelect, Position, View, Pointer, Timer, Key} from '@element-plus/icons-vue'
+import useClipboard from 'vue-clipboard3'
+
+const {toClipboard} = useClipboard()
+import {computed, onMounted, ref, watch} from 'vue'
+import {
+  Connection,
+  Delete,
+  Document,
+  Download,
+  Key,
+  Picture,
+  Pointer,
+  Position,
+  Search,
+  SemiSelect,
+  Timer,
+  VideoPlay,
+  View
+} from '@element-plus/icons-vue'
 import SwitchVue from './components/model/SwitchVue.vue'
 import {JsonViewer} from '@anilkumarthakur/vue3-json-viewer';
 import '@anilkumarthakur/vue3-json-viewer/styles.css';
+import {isDark} from "vue-dark-switch"
+import {ElMessage} from 'element-plus'
+import {curlToPython} from "./common/tools";
+
 // 请求记录
 const requests = ref([])
 const selectedRequest = ref(null)
@@ -401,6 +480,7 @@ const reconnect = () => {
 
 // 初始化模拟数据
 onMounted(() => {
+  // postData()
   initWebSocket()
 })
 watch(isConnected, (newVal, oldVal) => {
@@ -428,6 +508,7 @@ const filteredRequests = computed(() => {
     const searchText = filterText.value.toLowerCase()
     result = result.filter(r =>
         r.url.toLowerCase().includes(searchText) ||
+        r.text.toLowerCase().includes(searchText) ||
         (r.method && r.method.toLowerCase().includes(searchText)) ||
         (r.status && r.status.toString().includes(searchText))
     )
@@ -503,12 +584,18 @@ const handleMenuSelect = (index) => {
 
 // 处理行点击
 const handleRowClick = (row) => {
-  console.log(isDarkMode.value)
   selectedRequest.value = row
   try {
     jsonSource.value = JSON.parse(row.text)
   } catch (error) {
     jsonSource.value = {}
+  }
+}
+const handleRowClass = () => {
+  if (isDark.value) {
+    return "text-black bg-green-200"
+  } else {
+    return "bg-green-200"
   }
 }
 
@@ -569,6 +656,7 @@ const handle_png = (row) => {
   const imageType = ['png', 'jpg', 'image/webp', 'gif'];
   return imageExtensions.some(ext => url.endsWith(ext)) || imageType.includes(_type);
 }
+
 const openInBrowser = (url) => {
   console.log(url)
   window.ipcRenderer.openExternal(url);
@@ -580,6 +668,37 @@ const try_parse = (e) => {
   }
   return e;
 }
+
+const try_stringify = (e) => {
+  try {
+    e = JSON.stringify(e)
+  } catch (err) {
+  }
+  return e;
+}
+const check_cookie = (data) => {
+  return data['Cookie'] || data['cookie'] || data['Set-Cookie']
+}
+const get_cookie = (data) => {
+  const filter_ket = ["expires", "httponly", 'path', 'secure', 'domain']
+  const CookieDict = {}
+  const cookie = data['Cookie'] || data['cookie'] || data['Set-Cookie']
+  if (cookie) {
+    cookie.split(';').forEach(item => {
+      let [key, value] = item.split('=')
+      try {
+        key = key.trim().toLowerCase()
+        value = value.trim().toLowerCase()
+      } catch (e) {
+      }
+      if (!filter_ket.includes(key)) {
+        CookieDict[key] = value
+      }
+    })
+  }
+  return CookieDict
+}
+
 const check_if = (e) => {
   e = try_parse(e)
   return Object.keys(e).length > 0 || e.length > 0;
@@ -594,6 +713,8 @@ const contextMenu = ref({
 })
 
 const handleRightClick = (row, column, event) => {
+
+
   event.preventDefault() // 阻止默认右键菜单
   contextMenu.value = {
     visible: true,
@@ -610,8 +731,8 @@ const closeContextMenu = () => {
   document.removeEventListener('click', closeContextMenu)
 }
 
-const handleMenuClick = (action) => {
-  console.log(`执行 ${action} 操作`, contextMenu.value.row)
+const handleMenuClick = async (action) => {
+  console.log(`执行 ${action} 操作`, contextMenu.value.row.requestHeaders)
   closeContextMenu()
 
   // 根据action执行不同操作
@@ -626,21 +747,79 @@ const handleMenuClick = (action) => {
     case 'copy':
       // 复制逻辑
       break
+    case 'cookie':
+      await copy(try_stringify(get_cookie(contextMenu.value.row.requestHeaders)))
+      // 复制逻辑
+      break
+    case 'header':
+      await copy(try_stringify(contextMenu.value.row.requestHeaders))
+      // 复制逻辑
+      break
+    case 'params':
+      await copy(try_stringify(contextMenu.value.row.body))
+      // 复制逻辑
+      break
+    case 'curl':
+      await copy(generateCurl(contextMenu.value.row))
+      // 复制逻辑
+      break
+    case 'request':
+      await copy(curlToPython(generateCurl(contextMenu.value.row)))
+      // 复制逻辑
+      break
   }
 }
 
-const postData = async () => {
+const postData = async (port = "12028") => {
+  // try {
+  //   const response = await axios.post('http://localhost:12027/set_port', {
+  //     port: port // 示例数据
+  //   })
+  //   console.log(response.json)
+  // } catch (error) {
+  //   console.error('Error:', error)
+  // } finally {
+  // }
+  await copy()
+}
 
+
+const copy = async (val) => {
   try {
-    const response = await axios.post('http://localhost:12027/set_port', {
-      port: "10086" // 示例数据
-    })
-    console.log(response.json)
-  } catch (error) {
-    console.error('Error:', error)
-  } finally {
+    await toClipboard(val)
+    msg('复制成功')
+  } catch (e) {
+    console.error(e)
+    msg('复制失败', 'error')
   }
 }
+const msg = (message, type = 'success') => {
+  ElMessage(
+      {
+        message: message,
+        type: type,
+      }
+  )
+}
+
+
+const generateCurl = (data) => {
+  let curl = `curl -X ${data.method.toUpperCase()} '${data.url}'`;
+
+  // 添加headers
+  for (const [key, value] of Object.entries(data.requestHeaders)) {
+    curl += ` \\\n  -H '${key}: ${value}'`;
+  }
+
+  // 添加请求体（如果是POST/PUT等）
+  if (['POST', 'PUT', 'PATCH'].includes(data.method.toUpperCase())) {
+    curl += ` \\\n  -d '${JSON.stringify(data.body)}'`;
+  }
+  console.log(curl)
+  return curl
+};
+
+
 </script>
 
 <style scoped>
@@ -674,10 +853,11 @@ const postData = async () => {
 
 .context-menu {
   position: fixed;
-  background: white;
   border: 1px solid #ccc;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
   z-index: 9999;
+  max-height: 80vh; /* 限制最大高度 */
+  overflow-y: auto; /* 添加滚动条以防内容过多 */
 }
 
 .context-menu div {

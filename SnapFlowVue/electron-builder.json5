@@ -42,19 +42,6 @@
     "artifactName": "${productName}-Linux-${version}.${ext}"
   },
   extraResources: [
-    {
-      from: "services/run",
-      to: "services/run",
-      filter: [
-        "**/*"
-      ]
-    },
-    {
-      from: "services/scoket_run",
-      to: "services/scoket_run",
-      filter: [
-        "**/*"
-      ]
-    }
+    "./services",
   ]
 }

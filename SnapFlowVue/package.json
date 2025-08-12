@@ -48,6 +48,7 @@
     "is-electron": "^2.2.2",
     "tailwindcss": "^4.1.11",
     "use-element-plus-theme": "^0.0.5",
+    "vue-clipboard3": "^2.0.0",
     "vue-dark-switch": "^1.0.6",
     "vue-dompurify-html": "^5.3.0",
     "vue-router": "^4.5.1"

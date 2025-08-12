@@ -2,10 +2,10 @@ import {app, BrowserWindow, shell, ipcMain} from 'electron'
 import {createRequire} from 'node:module'
 import {fileURLToPath} from 'node:url'
 import path from 'node:path'
+import fs from 'node:fs'
 import os from 'node:os'
 import {spawn} from 'child_process';
 
-const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // The built directory structure
@@ -43,6 +43,7 @@ let win: BrowserWindow | null = null
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 let runServiceProcess
+let runApiServiceProcess
 let socketRunServiceProcess
 
 // 修改这部分代码
@@ -50,15 +51,21 @@ const servicesPath = app.isPackaged
     ? path.join(process.resourcesPath, 'services')
     : path.join(__dirname, '../../services')
 
-runServiceProcess = spawn(path.join(servicesPath, 'run/run'), {
-    stdio: 'inherit',
-    shell: true
-});
 
 socketRunServiceProcess = spawn(path.join(servicesPath, 'scoket_run/scoket_run'), {
     stdio: 'inherit',
     shell: true
 });
+
+runServiceProcess = spawn(path.join(servicesPath, 'run/run 12028'), {
+    stdio: 'inherit',
+    shell: true
+})
+
+// runApiServiceProcess = spawn(path.join(servicesPath, 'run_api/run_api'), {
+//     stdio: 'inherit',
+//     shell: true
+// })
 
 async function createWindow() {
     // runServiceProcess = spawn('./services/run/run', {stdio: 'inherit', shell: true});
@@ -147,6 +154,10 @@ app.on('will-quit', () => {
     if (runServiceProcess) {
         runServiceProcess.kill('SIGTERM');
         runServiceProcess = null;
+    }
+    if (runApiServiceProcess) {
+        runApiServiceProcess.kill('SIGTERM');
+        runApiServiceProcess = null;
     }
 
     if (socketRunServiceProcess) {
