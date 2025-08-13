@@ -1,15 +1,13 @@
-import datetime
 import json
 import socket
 import time
-
+from datetime import datetime
 from mitmproxy import http
 from loguru import logger
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 TCP_IP = "127.0.0.1"
 TCP_PORT = 2025
-logger.add("log.log")
 
 
 def get_timings(flow):
@@ -136,7 +134,7 @@ def response(flow: http.HTTPFlow):
     url = flow.request.url
     scheme = flow.request.scheme
     params = to_dict(flow.request.query)
-    date_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    date_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     body = ""
     if flow.request.urlencoded_form:
         body = to_dict(flow.request.urlencoded_form)
