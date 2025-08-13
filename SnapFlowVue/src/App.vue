@@ -16,9 +16,9 @@
             </el-icon>
             清空
           </el-button>
-<!--          <el-button @click="postData('10086')" size="small">-->
-<!--            测试-->
-<!--          </el-button>-->
+          <!--          <el-button @click="postData('10086')" size="small">-->
+          <!--            测试-->
+          <!--          </el-button>-->
         </el-button-group>
 
         <el-input
@@ -71,6 +71,13 @@
                   empty-text="没有捕获到网络请求"
                   @row-contextmenu="handleRightClick"
               >
+                <el-table-column prop="datetime" label="时间" width="135" align="center">
+                  <template #default="{ row }">
+                    <el-tag size="small">
+                      {{ row.datetime.substring(5) }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
                 <el-table-column prop="status" label="状态" width="70" align="center">
                   <template #default="{ row }">
                     <el-tag :type="getStatusTagType(row.status)" size="small">
@@ -94,10 +101,10 @@
                 </el-table-column>
                 <el-table-column prop="url" label="URL" min-width="400">
                   <template #default="{ row }">
-                    <div class="flex gap-2 items-center text-center">
+                    <div class="flex gap-2 items-center text-center cursor-pointer">
                       <img src="./assets/svg/CatppuccinUrl.svg" alt="Icon" width="15"
                            height="15">
-                      <el-tag type="info" >
+                      <el-tag type="info">
                         {{ row.url }}
                       </el-tag>
                     </div>
@@ -150,7 +157,7 @@
               <!-- 右键菜单 -->
               <div v-if="contextMenu.visible"
                    :style="{left: contextMenu.left + 'px', top: contextMenu.top + 'px'}"
-                   class="context-menu text-xs p-1 text-nowrap rounded "
+                   class="context-menu text-xs p-1 text-nowrap rounded-xl"
                    :class="handleRowClass()"
               >
                 <!-- 关闭按钮 -->
@@ -307,7 +314,14 @@
                       class="break-all"
                   />
                 </div>
-                <el-text v-dompurify-html="selectedRequest.text" class="pl-3 pr-3" v-else></el-text>
+                <el-text v-dompurify-html="selectedRequest.text" class="pl-3 pr-3"
+                         v-else-if="selectedRequest.type.toLowerCase() === 'html'"></el-text>
+                <div v-else-if="handle_png(selectedRequest)"
+                     class="flex justify-center items-center ">
+                  <img :src="selectedRequest.url" alt=""
+                       class="max-w-full  object-contain  min-w-[200px] min-h-[300px] max-h-[500px]">
+                </div>
+                <code-mirror v-model="selectedRequest.text" basic :lang="lang" v-else/>
               </el-tab-pane>
               <el-tab-pane label="响应">
                 <template #label>
@@ -318,7 +332,7 @@
                     <span>响应</span>
                   </div>
                 </template>
-                <el-text class="pl-3 pr-3">{{ selectedRequest.text }}</el-text>
+                <code-mirror v-model="selectedRequest.text" basic :lang="lang" :dark="isDark"/>
               </el-tab-pane>
               <el-tab-pane>
                 <template #label>
@@ -414,12 +428,18 @@ import '@anilkumarthakur/vue3-json-viewer/styles.css';
 import {isDark} from "vue-dark-switch"
 import {ElMessage} from 'element-plus'
 import {curlToPython} from "./common/tools";
+import CodeMirror from 'vue-codemirror6';
+import {html} from '@codemirror/lang-html';
+import {json} from '@codemirror/lang-json';
+import {css} from '@codemirror/lang-css';
+import {javascript} from '@codemirror/lang-javascript';
 
 // 请求记录
 const requests = ref([])
 const selectedRequest = ref(null)
 const isRecording = ref(true)
 const filterText = ref('')
+const lang = ref('')
 const activeView = ref('all')
 const isDarkMode = ref(true);
 
@@ -582,13 +602,33 @@ const handleMenuSelect = (index) => {
   activeView.value = index
 }
 
+const formattedJson = (jsonString) => {
+  try {
+    const jsonObj = JSON.parse(jsonString);
+    return JSON.stringify(jsonObj, null, 2); // 2个空格缩进
+  } catch (e) {
+    return jsonString; // 如果不是合法JSON，返回原字符串
+  }
+};
 // 处理行点击
 const handleRowClick = (row) => {
   selectedRequest.value = row
+  const type = row.type.toLowerCase()
+  lang.value = html()
   try {
     jsonSource.value = JSON.parse(row.text)
   } catch (error) {
     jsonSource.value = {}
+  }
+  if (type === 'json') {
+    selectedRequest.value.text = formattedJson(row.text)
+    lang.value = json()
+  }
+  if (type === 'css') {
+    lang.value = css()
+  }
+  if (type === 'js') {
+    lang.value = javascript()
   }
 }
 const handleRowClass = () => {
@@ -713,13 +753,12 @@ const contextMenu = ref({
 })
 
 const handleRightClick = (row, column, event) => {
-
-
+  const top = window.innerHeight - event.clientY > 200 ? event.clientY : event.clientY - 200
   event.preventDefault() // 阻止默认右键菜单
   contextMenu.value = {
     visible: true,
     left: event.clientX,
-    top: event.clientY,
+    top: top,
     row,
     index: filteredRequests.value.indexOf(row)
   }
