@@ -1,7 +1,5 @@
 # SnapFlow - 灵嗅
 
-![Project Logo](./SnapFlowVue/public/logo.svg)
-
 一个基于 `mitmproxy` 的简单高效的抓包工具。
 目前仅支持mac系统
 
@@ -30,9 +28,9 @@
 
 ## 运行实例
 
-![Project Logo](./SnapFlowVue/public/img/1.png)
-![Project Logo](./SnapFlowVue/public/img/2.png)
-![Project Logo](./SnapFlowVue/public/img/3.png)
-![Project Logo](./SnapFlowVue/public/img/4.png)
+![1](./SnapFlowVue/public/img/1.png)
+![2](./SnapFlowVue/public/img/2.png)
+![3](./SnapFlowVue/public/img/3.png)
+![4](./SnapFlowVue/public/img/4.png)
 
 
