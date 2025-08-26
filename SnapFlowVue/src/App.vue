@@ -321,7 +321,7 @@
                   <img :src="selectedRequest.url" alt=""
                        class="max-w-full  object-contain  min-w-[200px] min-h-[300px] max-h-[500px]">
                 </div>
-                <code-mirror v-model="selectedRequest.text" basic :lang="lang" v-else/>
+                <code-mirror v-model="selectedRequest.text" wrap basic :lang="lang" v-else/>
               </el-tab-pane>
               <el-tab-pane label="响应">
                 <template #label>
@@ -332,7 +332,7 @@
                     <span>响应</span>
                   </div>
                 </template>
-                <code-mirror v-model="selectedRequest.text" basic :lang="lang" :dark="isDark"/>
+                <code-mirror v-model="selectedRequest.text" wrap basic :lang="lang" :dark="isDark" />
               </el-tab-pane>
               <el-tab-pane>
                 <template #label>
@@ -529,6 +529,7 @@ const filteredRequests = computed(() => {
     result = result.filter(r =>
         r.url.toLowerCase().includes(searchText) ||
         r.text.toLowerCase().includes(searchText) ||
+        JSON.stringify(r.body).toLowerCase().includes(searchText) ||
         (r.method && r.method.toLowerCase().includes(searchText)) ||
         (r.status && r.status.toString().includes(searchText))
     )

@@ -138,6 +138,8 @@ def response(flow: http.HTTPFlow):
     body = ""
     if flow.request.urlencoded_form:
         body = to_dict(flow.request.urlencoded_form)
+    if flow.request.text:
+        body = flow.request.text
     try:
         body = flow.request.json()
     except:
@@ -163,7 +165,6 @@ def response(flow: http.HTTPFlow):
         "responseBody": text,
         "timings": get_timings(flow)  # 计算耗时
     }
-
     send_to_tcp(data)
 
 
