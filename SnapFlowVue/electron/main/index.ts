@@ -51,13 +51,33 @@ const servicesPath = app.isPackaged
     ? path.join(process.resourcesPath, 'services')
     : path.join(__dirname, '../../services')
 
+// 注意：这仅在Node.js环境中有效
+const getPath = () => {
+    const os = process.platform;
+    if (os.includes('win')) return {
+        socket: 'win/scoket_run/scoket_run.exe',
+        run: 'win/run/run.exe',
+    };
+    if (os.includes('mac')) return {
+        socket: 'scoket_run/scoket_run',
+        run: 'run/run 12028',
+    };
+    return {
+        socket: 'scoket_run/scoket_run',
+        run: 'run/run 12028',
+    };
+}
 
-socketRunServiceProcess = spawn(path.join(servicesPath, 'scoket_run/scoket_run'), {
+// 使用示例
+const getRunPath = getPath()
+
+// mac运行方式
+socketRunServiceProcess = spawn(path.join(servicesPath, getRunPath.socket), {
     stdio: 'inherit',
     shell: true
 });
 
-runServiceProcess = spawn(path.join(servicesPath, 'run/run 12028'), {
+runServiceProcess = spawn(path.join(servicesPath, getRunPath.run), {
     stdio: 'inherit',
     shell: true
 })
