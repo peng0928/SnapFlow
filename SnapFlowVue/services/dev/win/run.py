@@ -1,7 +1,14 @@
+import sys
 import os
+
+# 强制替换 stdout/stderr，防止 None
+sys.stdout = open(os.devnull, "w")
+sys.stderr = open(os.devnull, "w")
+
+# 告诉 mitmproxy 不要尝试终端
+os.environ["MITMPROXY_NO_TTY"] = "1"
 from mitmproxy.tools.main import mitmdump
 from loguru import logger
-import sys
 
 port = '12028'
 
