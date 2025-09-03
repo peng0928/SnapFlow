@@ -22,7 +22,10 @@
 - 🔧 支持 TCP 协议
 
 ## 快速开始
+### 1.下载
 
+[win下载](https://github.com/peng0928/SnapFlow/releases/download/v1.0.0/Windows-1.0.0-Setup.exe)
+[Mac下载](https://github.com/peng0928/SnapFlow/releases/download/v1.0.0/app-for-mac.zip)
 ## 贡献
 
 欢迎提交 Issue 和 PR！
